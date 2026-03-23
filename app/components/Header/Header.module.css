@@ -1,0 +1,173 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid #d2d2d7;
+}
+
+.nav {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.navContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+}
+
+.logo {
+  font-size: 21px;
+  font-weight: 600;
+  color: #1d1d1f;
+  text-decoration: none;
+}
+
+.menu {
+  display: none;
+  align-items: center;
+  gap: 32px;
+}
+
+.menuLink {
+  font-size: 12px;
+  color: #6e6e73;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.menuLink:hover {
+  color: #1d1d1f;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  color: #6e6e73;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.iconButton:hover {
+  color: #1d1d1f;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+}
+
+.loginLink {
+  display: none;
+  font-size: 12px;
+  color: #6e6e73;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.loginLink:hover {
+  color: #1d1d1f;
+}
+
+.mobileMenuButton {
+  display: block;
+  background: none;
+  border: none;
+  color: #6e6e73;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mobileMenu {
+  padding: 16px 0;
+  border-top: 1px solid #d2d2d7;
+}
+
+.mobileMenuLink {
+  display: block;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #6e6e73;
+  text-decoration: none;
+}
+
+.mobileMenuLink.primary {
+  color: #06c;
+}
+
+@media (min-width: 768px) {
+  .menu {
+    display: flex;
+  }
+
+  .loginLink {
+    display: block;
+  }
+
+  .mobileMenuButton {
+    display: none;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .header {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-bottom-color: #424245;
+  }
+
+  .logo {
+    color: #f5f5f7;
+  }
+
+  .menuLink {
+    color: #a1a1a6;
+  }
+
+  .menuLink:hover {
+    color: #f5f5f7;
+  }
+
+  .iconButton {
+    color: #a1a1a6;
+  }
+
+  .iconButton:hover {
+    color: #f5f5f7;
+  }
+
+  .loginLink {
+    color: #a1a1a6;
+  }
+
+  .loginLink:hover {
+    color: #f5f5f7;
+  }
+
+  .mobileMenuButton {
+    color: #a1a1a6;
+  }
+
+  .mobileMenu {
+    border-top-color: #424245;
+  }
+
+  .mobileMenuLink {
+    color: #a1a1a6;
+  }
+
+  .mobileMenuLink.primary {
+    color: #2997ff;
+  }
+}
