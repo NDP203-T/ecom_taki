@@ -3,19 +3,41 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAppSelector } from '@/lib/store/hooks';
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
+import { useAppSelector, useAppDispatch } from '@/lib/store/hooks';
+import { googleLoginRequest } from '@/lib/store/slices/authSlice';
 import LoginForm from '@/app/components/Auth/LoginForm';
 import styles from './signin.module.css';
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
-  const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, isLoading, error } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (user) {
       router.push('/');
     }
   }, [user, router]);
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      // tokenResponse chứa access_token, cần đổi sang ID token
+      // Hoặc gọi API Google để lấy user info
+      fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${tokenResponse.access_token}`)
+        .then(res => res.json())
+        .then(userInfo => {
+          // Gửi userInfo hoặc access_token đến backend
+          dispatch(googleLoginRequest({ token: tokenResponse.access_token }));
+        })
+        .catch(err => {
+          console.error('Failed to get user info:', err);
+        });
+    },
+    onError: () => {
+      console.error('Google login failed');
+    },
+  });
 
   return (
     <div className={styles.page}>
@@ -38,6 +60,8 @@ export default function SignInPage() {
           <LoginForm />
         </div>
 
+        {error && <div className={styles.error}>{error}</div>}
+
         <div className={styles.forgotPassword}>
           <Link href="/auth/forgot-password" className={styles.link}>
             Quên mật khẩu?
@@ -49,7 +73,11 @@ export default function SignInPage() {
         </div>
 
         <div className={styles.oauthButtons}>
-          <button className={styles.oauthButton}>
+          <button 
+            className={styles.oauthButton}
+            onClick={() => handleGoogleLogin()}
+            disabled={isLoading}
+          >
             <svg className={styles.oauthIcon} viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -68,10 +96,10 @@ export default function SignInPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            <span>Tiếp tục với Google</span>
+            <span>{isLoading ? 'Đang xử lý...' : 'Tiếp tục với Google'}</span>
           </button>
 
-          <button className={styles.oauthButton}>
+          <button className={styles.oauthButton} disabled={isLoading}>
             <svg
               className={styles.oauthIcon}
               fill="#1877F2"
@@ -106,5 +134,15 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+
+  return (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <SignInContent />
+    </GoogleOAuthProvider>
   );
 }

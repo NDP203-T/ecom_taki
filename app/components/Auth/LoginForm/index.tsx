@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
-import { loginRequest } from '@/lib/store/slices/authSlice';
+import { loginRequest} from '@/lib/store/slices/authSlice';
 import styles from './LoginForm.module.css';
 
 interface LoginFormProps {

@@ -162,6 +162,43 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = action.payload;
     },
+
+    // Google Login actions
+    googleLoginRequest: (
+      state,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _action: PayloadAction<{ token: string }>
+    ) => {
+      state.isLoading = true;
+      state.error = null;
+    },
+    googleLoginSuccess: (
+      state,
+      action: PayloadAction<{
+        access_token: string;
+        refresh_token: string;
+        user: {
+          id: string;
+          email: string;
+          full_name: string;
+          role?: string;
+          avatar_url?: string;
+          is_verified?: boolean;
+        };
+      }>
+    ) => {
+      state.isLoading = false;
+      state.user = action.payload.user;
+      state.error = null;
+      
+      storage.setToken(action.payload.access_token);
+      storage.setRefreshToken(action.payload.refresh_token);
+      storage.setUserData(action.payload.user);
+    },
+    googleLoginFailure: (state, action: PayloadAction<string>) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -180,6 +217,9 @@ export const {
   loginRequest,
   loginSuccess,
   loginFailure,
+  googleLoginRequest,
+  googleLoginSuccess,
+  googleLoginFailure,
 } = authSlice.actions;
 
 export default authSlice.reducer;

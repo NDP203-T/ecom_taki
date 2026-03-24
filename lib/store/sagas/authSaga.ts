@@ -14,6 +14,9 @@ import {
   loginRequest,
   loginSuccess,
   loginFailure,
+  googleLoginRequest,
+  googleLoginSuccess,
+  googleLoginFailure,
 } from '../slices/authSlice';
 
 function* handleRegister(
@@ -147,9 +150,59 @@ function* handleLogin(
   }
 }
 
+function* handleGoogleLogin(
+  action: PayloadAction<{ token: string }>
+): Generator {
+  try {
+    const response = (yield call(authAPI.googleLogin, action.payload)) as {
+      access_token: string;
+      refresh_token: string;
+      user: {
+        id: string;
+        email: string;
+        full_name: string;
+        role: string;
+        avatar_url: string;
+        is_verified: boolean;
+      };
+    };
+    
+    yield put(
+      googleLoginSuccess({
+        access_token: response.access_token,
+        refresh_token: response.refresh_token,
+        user: {
+          id: response.user.id,
+          email: response.user.email,
+          full_name: response.user.full_name,
+          role: response.user.role,
+          avatar_url: response.user.avatar_url,
+          is_verified: response.user.is_verified,
+        },
+      })
+    );
+
+    // Redirect dựa trên role
+    if (typeof window !== 'undefined') {
+      if (response.user.role === 'admin') {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/';
+      }
+    }
+  } catch (err) {
+    const error = err as { response?: { data?: { message?: string } } };
+    const errorMessage =
+      error.response?.data?.message ||
+      'Đăng nhập Google thất bại. Vui lòng thử lại.';
+    yield put(googleLoginFailure(errorMessage));
+  }
+}
+
 export function* authSaga() {
   yield takeLatest(registerRequest.type, handleRegister);
   yield takeLatest(verifyOTPRequest.type, handleVerifyOTP);
   yield takeLatest(resendOTPRequest.type, handleResendOTP);
   yield takeLatest(loginRequest.type, handleLogin);
+  yield takeLatest(googleLoginRequest.type, handleGoogleLogin);
 }
