@@ -5,101 +5,91 @@ import { useSearchParams } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
-import { productsAPI } from '@/lib/api/products';
-import { categoriesAPI } from '@/lib/api/categories';
+import { useAppSelector, useAppDispatch } from '@/lib/store/hooks';
+import { getProductsRequest } from '@/lib/store/slices/productSlice';
+import { getCategoriesTreeRequest } from '@/lib/store/slices/categorySlice';
 import styles from './products.module.css';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image_url?: string;
-  images?: string[];
-  category: string;
-  is_active: boolean;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  is_active: boolean;
-  children?: Category[];
-}
 
 function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
+  const dispatch = useAppDispatch();
   
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'all');
+  const { products, loading: productsLoading } = useAppSelector((state) => state.product);
+  const { categoriesTree, loading: categoriesLoading } = useAppSelector((state) => state.category);
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
-    loadData();
-  }, []);
+    dispatch(getProductsRequest());
+    dispatch(getCategoriesTreeRequest());
+  }, [dispatch]);
 
-  useEffect(() => {
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
+  // Initialize selected category from URL param
+  const effectiveCategory = categoryParam || selectedCategory;
+
+  const loading = productsLoading || categoriesLoading;
+
+  // Helper function to count products by category
+  const getProductCount = (categoryIdentifier: string) => {
+    return products.filter(p => 
+      p.is_active && (
+        p.category === categoryIdentifier || 
+        p.category === categoryIdentifier.toLowerCase() ||
+        p.category.toLowerCase() === categoryIdentifier.toLowerCase()
+      )
+    ).length;
+  };
+
+  // Helper function to count products including children categories
+  const getProductCountWithChildren = (category: typeof categoriesTree[0]) => {
+    let count = getProductCount(category.slug || category.name);
+    
+    if (category.children && category.children.length > 0) {
+      category.children.forEach(child => {
+        if (child.is_active) {
+          count += getProductCount(child.slug || child.name);
+        }
+      });
     }
-  }, [categoryParam]);
+    
+    return count;
+  };
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Load products
-      const productsData = await productsAPI.getAll();
-      const productsArray = productsData.products 
-        ? Object.values(productsData.products).map((product: unknown) => {
-            const prod = product as Record<string, unknown>;
-            return {
-              ...prod,
-              images: prod.images 
-                ? Object.values(prod.images as Record<string, unknown>).map((img: unknown) => (img as Record<string, unknown>).image_url as string)
-                : [],
-              is_active: prod.is_active === 'True' || prod.is_active === true,
-              category: String(prod.category || ''),
-            };
-          })
-        : [];
-      
-      setProducts(productsArray as Product[]);
-
-      // Load categories tree
-      const categoriesData = await categoriesAPI.getTree();
-      const categoriesArray = categoriesData.categories 
-        ? Object.values(categoriesData.categories).map((category: unknown) => {
-            const cat = category as Record<string, unknown>;
-            return {
-              ...cat,
-              is_active: cat.is_active === 'True' || cat.is_active === true,
-              children: cat.children 
-                ? Object.values(cat.children as Record<string, unknown>).map((child: unknown) => {
-                    const c = child as Record<string, unknown>;
-                    return {
-                      ...c,
-                      is_active: c.is_active === 'True' || c.is_active === true,
-                    };
-                  })
-                : [],
-            };
-          })
-        : [];
-      
-      setCategories(categoriesArray as Category[]);
-    } finally {
-      setLoading(false);
+  // Helper function to check if product belongs to category or its children
+  const isProductInCategory = (product: typeof products[0], categoryIdentifier: string) => {
+    if (product.category === categoryIdentifier || 
+        product.category.toLowerCase() === categoryIdentifier.toLowerCase()) {
+      return true;
     }
+    
+    const category = categoriesTree.find(c => 
+      c.slug === categoryIdentifier || 
+      c.name === categoryIdentifier ||
+      c.slug?.toLowerCase() === categoryIdentifier.toLowerCase() ||
+      c.name.toLowerCase() === categoryIdentifier.toLowerCase()
+    );
+    
+    if (category && category.children && category.children.length > 0) {
+      return category.children.some(child => 
+        product.category === child.slug ||
+        product.category === child.name ||
+        product.category.toLowerCase() === child.slug?.toLowerCase() ||
+        product.category.toLowerCase() === child.name.toLowerCase()
+      );
+    }
+    
+    return false;
   };
 
   const filteredProducts = products
     .filter(p => p.is_active)
-    .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
+    .filter(p => {
+      if (effectiveCategory === 'all') return true;
+      return isProductInCategory(p, effectiveCategory);
+    })
     .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       switch (sortBy) {
@@ -133,23 +123,23 @@ function ProductsContent() {
               <h3 className={styles.filterTitle}>Danh mục</h3>
               <div className={styles.filterList}>
                 <button
-                  className={`${styles.filterItem} ${selectedCategory === 'all' ? styles.active : ''}`}
+                  className={`${styles.filterItem} ${effectiveCategory === 'all' ? styles.active : ''}`}
                   onClick={() => setSelectedCategory('all')}
                 >
                   Tất cả
                   <span className={styles.count}>({products.filter(p => p.is_active).length})</span>
                 </button>
-                {categories
+                {categoriesTree
                   .filter(c => c.is_active)
                   .map((category) => {
-                    const parentCount = products.filter(p => p.is_active && p.category === category.name).length;
+                    const parentCount = getProductCountWithChildren(category);
                     const hasChildren = category.children && category.children.length > 0;
                     
                     return (
                       <div key={category.id}>
                         <button
-                          className={`${styles.filterItem} ${selectedCategory === category.name ? styles.active : ''}`}
-                          onClick={() => setSelectedCategory(category.name)}
+                          className={`${styles.filterItem} ${effectiveCategory === category.slug || effectiveCategory === category.name ? styles.active : ''}`}
+                          onClick={() => setSelectedCategory(category.slug || category.name)}
                         >
                           {category.name}
                           <span className={styles.count}>({parentCount})</span>
@@ -160,12 +150,12 @@ function ProductsContent() {
                             {category.children!
                               .filter(child => child.is_active)
                               .map((child) => {
-                                const childCount = products.filter(p => p.is_active && p.category === child.name).length;
+                                const childCount = getProductCount(child.slug || child.name);
                                 return (
                                   <button
                                     key={child.id}
-                                    className={`${styles.filterItem} ${styles.subItem} ${selectedCategory === child.name ? styles.active : ''}`}
-                                    onClick={() => setSelectedCategory(child.name)}
+                                    className={`${styles.filterItem} ${styles.subItem} ${effectiveCategory === child.slug || effectiveCategory === child.name ? styles.active : ''}`}
+                                    onClick={() => setSelectedCategory(child.slug || child.name)}
                                   >
                                     {child.name}
                                     <span className={styles.count}>({childCount})</span>

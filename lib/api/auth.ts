@@ -5,7 +5,7 @@ import { decryptResponse, isEncrypted } from '../utils/encryption';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Create axios instance with interceptor
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_URL,
 });
 
