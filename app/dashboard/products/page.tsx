@@ -14,6 +14,8 @@ export default function ProductsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -29,9 +31,28 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       const data = await productsAPI.getAll();
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error('Failed to load products:', error);
+      
+      // Convert products object to array
+      const productsArray = data.products 
+        ? Object.values(data.products).map((product: unknown) => {
+            const prod = product as Record<string, unknown>;
+            return {
+              ...prod,
+              // Convert images object to array and extract URLs
+              images: prod.images 
+                ? Object.values(prod.images as Record<string, unknown>).map((img: unknown) => (img as Record<string, unknown>).image_url as string)
+                : [],
+              // Ensure description is string
+              description: String(prod.description || ''),
+              // Ensure category is string
+              category: String(prod.category || ''),
+              // Convert string booleans to actual booleans
+              is_active: prod.is_active === 'True' || prod.is_active === true,
+            };
+          })
+        : [];
+      
+      setProducts(productsArray as Product[]);
     } finally {
       setLoading(false);
     }
@@ -43,7 +64,7 @@ export default function ProductsPage() {
     try {
       await productsAPI.delete(productId);
       await loadProducts();
-    } catch (error) {
+    } catch {
       alert('Xóa sản phẩm thất bại');
     }
   };
@@ -52,7 +73,7 @@ export default function ProductsPage() {
     try {
       await productsAPI.toggleStatus(productId);
       await loadProducts();
-    } catch (error) {
+    } catch {
       alert('Cập nhật trạng thái thất bại');
     }
   };
@@ -146,9 +167,17 @@ export default function ProductsPage() {
                 {filteredProducts.map((product) => (
                   <tr key={product.id}>
                     <td>
-                      <div className={styles.productImage}>
-                        {product.image_url || (product.images && product.images.length > 0) ? (
-                          <img src={product.image_url || product.images[0]} alt={product.name} />
+                      <div 
+                        className={styles.productImage}
+                        onClick={() => {
+                          setViewingProduct(product);
+                          setShowDetailModal(true);
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {product.image_url || (product.images && Array.isArray(product.images) && product.images.length > 0) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={product.image_url || (Array.isArray(product.images) ? product.images[0] : '')} alt={product.name} />
                         ) : (
                           <div className={styles.noImage}>
                             <svg
@@ -169,11 +198,19 @@ export default function ProductsPage() {
                         )}
                       </div>
                     </td>
-                    <td>
+                    <td 
+                      onClick={() => {
+                        setViewingProduct(product);
+                        setShowDetailModal(true);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className={styles.productInfo}>
                         <span className={styles.productName}>{product.name}</span>
                         <span className={styles.productDesc}>
-                          {product.description?.substring(0, 50)}...
+                          {typeof product.description === 'string' 
+                            ? product.description.substring(0, 50) + '...'
+                            : ''}
                         </span>
                       </div>
                     </td>
@@ -277,9 +314,17 @@ export default function ProductsPage() {
           <div className={styles.cardsContainer}>
             {filteredProducts.map((product) => (
               <div key={product.id} className={styles.productCard}>
-                <div className={styles.cardImage}>
-                  {product.image_url || (product.images && product.images.length > 0) ? (
-                    <img src={product.image_url || product.images[0]} alt={product.name} />
+                <div 
+                  className={styles.cardImage}
+                  onClick={() => {
+                    setViewingProduct(product);
+                    setShowDetailModal(true);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {product.image_url || (product.images && Array.isArray(product.images) && product.images.length > 0) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={product.image_url || (Array.isArray(product.images) ? product.images[0] : '')} alt={product.name} />
                   ) : (
                     <div className={styles.noImage}>
                       <svg
@@ -300,7 +345,14 @@ export default function ProductsPage() {
                   )}
                 </div>
                 <div className={styles.cardContent}>
-                  <div className={styles.cardHeader}>
+                  <div 
+                    className={styles.cardHeader}
+                    onClick={() => {
+                      setViewingProduct(product);
+                      setShowDetailModal(true);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <h3 className={styles.cardTitle}>{product.name}</h3>
                     <button
                       className={`${styles.statusBadge} ${
@@ -312,7 +364,9 @@ export default function ProductsPage() {
                     </button>
                   </div>
                   <p className={styles.cardDesc}>
-                    {product.description?.substring(0, 80)}...
+                    {typeof product.description === 'string'
+                      ? product.description.substring(0, 80) + '...'
+                      : ''}
                   </p>
                   <div className={styles.cardMeta}>
                     <span className={styles.cardCategory}>{product.category}</span>
@@ -415,6 +469,21 @@ export default function ProductsPage() {
           }}
         />
       )}
+
+      {showDetailModal && viewingProduct && (
+        <ProductDetailModal
+          product={viewingProduct}
+          onClose={() => {
+            setShowDetailModal(false);
+            setViewingProduct(null);
+          }}
+          onEdit={() => {
+            setShowDetailModal(false);
+            setEditingProduct(viewingProduct);
+            setShowModal(true);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -429,14 +498,30 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
   const [formData, setFormData] = useState({
     name: product?.name || '',
     sku: product?.sku || '',
-    description: product?.description || '',
+    description: String(product?.description || ''),
     price: product?.price || 0,
     stock: product?.stock || 0,
     image_url: product?.image_url || '',
-    category: product?.category || '',
-    is_active: product?.is_active ?? true,
+    category: String(product?.category || ''),
+    is_active: product?.is_active === true || product?.is_active === 'True',
   });
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(
+    product?.image_url || ''
+  );
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -444,6 +529,7 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
 
     try {
       if (product) {
+        // Update existing product
         await productsAPI.update(product.id, {
           name: formData.name,
           sku: formData.sku,
@@ -452,11 +538,30 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
           image_url: formData.image_url,
           category: formData.category,
         });
+
+        // Upload new image if selected
+        if (imageFile) {
+          const formDataImage = new FormData();
+          formDataImage.append('image', imageFile);
+          await productsAPI.uploadImage(product.id, formDataImage);
+        }
       } else {
-        await productsAPI.create(formData);
+        // Create new product
+        const newProduct = await productsAPI.create({
+          ...formData,
+          description: String(formData.description),
+          category: String(formData.category),
+        });
+
+        // Upload image if selected
+        if (imageFile && newProduct.id) {
+          const formDataImage = new FormData();
+          formDataImage.append('image', imageFile);
+          await productsAPI.uploadImage(newProduct.id, formDataImage);
+        }
       }
       onSuccess();
-    } catch (error) {
+    } catch {
       alert('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
@@ -569,16 +674,64 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
             </div>
 
             <div className={styles.formGroup}>
-              <label>URL hình ảnh</label>
-              <input
-                type="url"
-                value={formData.image_url}
-                onChange={(e) =>
-                  setFormData({ ...formData, image_url: e.target.value })
-                }
-                placeholder="https://example.com/image.jpg"
-                required
-              />
+              <label>Hình ảnh sản phẩm</label>
+              <div className={styles.imageUpload}>
+                {imagePreview && (
+                  <div className={styles.imagePreview}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imagePreview} alt="Preview" />
+                    <button
+                      type="button"
+                      className={styles.removeImage}
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview('');
+                        setFormData({ ...formData, image_url: '' });
+                      }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                <label className={styles.uploadButton}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={{ display: 'none' }}
+                  />
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span>
+                    {imagePreview ? 'Thay đổi hình ảnh' : 'Chọn hình ảnh'}
+                  </span>
+                </label>
+              </div>
             </div>
 
             {!product && (
@@ -615,6 +768,168 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+interface ProductDetailModalProps {
+  product: Product;
+  onClose: () => void;
+  onEdit: () => void;
+}
+
+function ProductDetailModal({ product, onClose, onEdit }: ProductDetailModalProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  const images = product.images && Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : product.image_url
+    ? [product.image_url]
+    : [];
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.detailModal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h2>Chi tiết sản phẩm</h2>
+          <button className={styles.closeButton} onClick={onClose}>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className={styles.detailContent}>
+          <div className={styles.detailImageSection}>
+            {images.length > 0 ? (
+              <>
+                <div className={styles.detailMainImage}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={images[currentImageIndex]} alt={product.name} />
+                  {images.length > 1 && (
+                    <>
+                      <button className={styles.imagePrevButton} onClick={prevImage}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button className={styles.imageNextButton} onClick={nextImage}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+                {images.length > 1 && (
+                  <div className={styles.detailThumbnails}>
+                    {images.map((img, index) => (
+                      <div
+                        key={index}
+                        className={`${styles.thumbnail} ${index === currentImageIndex ? styles.activeThumbnail : ''}`}
+                        onClick={() => setCurrentImageIndex(index)}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img} alt={`${product.name} ${index + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className={styles.detailNoImage}>
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <p>Không có hình ảnh</p>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.detailInfo}>
+            <div className={styles.detailHeader}>
+              <h3 className={styles.detailTitle}>{product.name}</h3>
+              <span className={`${styles.statusBadge} ${product.is_active ? styles.active : styles.inactive}`}>
+                {product.is_active ? 'Hiển thị' : 'Ẩn'}
+              </span>
+            </div>
+
+            <div className={styles.detailPrice}>${product.price.toLocaleString()}</div>
+
+            <div className={styles.detailSection}>
+              <label>SKU</label>
+              <p>{product.sku}</p>
+            </div>
+
+            <div className={styles.detailSection}>
+              <label>Danh mục</label>
+              <p>{String(product.category)}</p>
+            </div>
+
+            <div className={styles.detailSection}>
+              <label>Tồn kho</label>
+              <p>
+                <span className={`${styles.stock} ${product.stock < 10 ? styles.lowStock : ''}`}>
+                  {product.stock} sản phẩm
+                </span>
+              </p>
+            </div>
+
+            <div className={styles.detailSection}>
+              <label>Mô tả</label>
+              <p className={styles.detailDescription}>
+                {String(product.description || 'Không có mô tả')}
+              </p>
+            </div>
+
+            <div className={styles.detailSection}>
+              <label>Ngày tạo</label>
+              <p>{new Date(product.created_at).toLocaleString('vi-VN')}</p>
+            </div>
+
+            <div className={styles.detailSection}>
+              <label>Cập nhật lần cuối</label>
+              <p>{new Date(product.updated_at).toLocaleString('vi-VN')}</p>
+            </div>
+
+            <button className={styles.editDetailButton} onClick={onEdit}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+              Chỉnh sửa sản phẩm
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

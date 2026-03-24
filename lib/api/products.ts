@@ -82,13 +82,13 @@ export interface Product {
   id: string;
   name: string;
   sku: string;
-  description: string;
+  description: string | number;
   price: number;
   stock: number;
   image_url: string;
-  category: string;
-  images: string[];
-  is_active: boolean;
+  category: string | number;
+  images: string[] | Record<string, unknown>;
+  is_active: boolean | string;
   created_at: string;
   updated_at: string;
 }
@@ -102,6 +102,11 @@ export interface CreateProductPayload {
   image_url: string;
   category: string;
   is_active?: boolean;
+}
+
+export interface ProductResponse {
+  id?: string;
+  [key: string]: unknown;
 }
 
 export interface UpdateProductPayload {
@@ -141,7 +146,7 @@ export const productsAPI = {
   },
 
   // POST /api/products/add - Create product (Admin only)
-  create: async (data: CreateProductPayload) => {
+  create: async (data: CreateProductPayload): Promise<ProductResponse> => {
     const response = await apiClient.post('/products/add', data);
     return response.data;
   },
