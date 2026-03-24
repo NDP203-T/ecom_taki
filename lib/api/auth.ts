@@ -113,6 +113,10 @@ export interface RefreshTokenPayload {
   refresh_token: string;
 }
 
+export interface GoogleLoginPayload {
+  token: string;
+}
+
 export const authAPI = {
   register: async (data: RegisterPayload) => {
     const response = await apiClient.post('/auth/register', data);
@@ -138,6 +142,11 @@ export const authAPI = {
     const response = await apiClient.post('/auth/refresh', {
       refresh_token: refreshToken,
     });
+    return response.data;
+  },
+
+  googleLogin: async (data: GoogleLoginPayload) => {
+    const response = await apiClient.post('/auth/google', data);
     return response.data;
   },
 };
