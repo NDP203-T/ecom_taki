@@ -1,18 +1,29 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { CreateOrderData } from '@/lib/api/orders';
 
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  product_name: string;
+  variant_id?: string;
+  variant_name?: string;
+  sku: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
 export interface Order {
   id: string;
   order_number: string;
   status: string;
+  payment_status: string;
   total: number;
+  subtotal: number;
   created_at: string;
-  items: Array<{
-    product_id: string;
-    variant_id?: string;
-    quantity: number;
-    price: number;
-  }>;
+  updated_at: string;
+  items: OrderItem[];
   customer_name: string;
   customer_phone: string;
   customer_email: string;
@@ -24,6 +35,13 @@ export interface Order {
   shipping_fee: number;
   discount: number;
   note?: string;
+  user_id: string;
+  items_count: number;
+  confirmed_at?: string;
+  cancelled_at?: string;
+  completed_at?: string;
+  delivered_at?: string;
+  admin_note?: string;
 }
 
 interface OrderState {
