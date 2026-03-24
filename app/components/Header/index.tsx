@@ -13,9 +13,12 @@ export default function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { user } = useAppSelector((state) => state.auth);
+  const { items } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const cartItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   // Fix hydration mismatch - use layout effect to avoid cascading renders
   useEffect(() => {
@@ -107,7 +110,7 @@ export default function Header() {
                 />
               </svg>
             </button>
-            <button className={styles.iconButton} aria-label="Giỏ hàng">
+            <button className={styles.iconButton} aria-label="Giỏ hàng" onClick={() => router.push('/cart')}>
               <svg
                 className={styles.icon}
                 fill="none"
@@ -121,6 +124,9 @@ export default function Header() {
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
+              {cartItemsCount > 0 && (
+                <span className={styles.cartBadge}>{cartItemsCount}</span>
+              )}
             </button>
 
             {mounted && user ? (
