@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -204,7 +205,7 @@ function ProductsContent() {
                     const hasChildren = category.children && category.children.length > 0;
                     
                     return (
-                      <div key={category.id}>
+                      <React.Fragment key={category.id}>
                         <button
                           className={`${styles.filterItem} ${selectedCategory === category.slug || selectedCategory === category.name ? styles.active : ''}`}
                           onClick={() => setSelectedCategory(category.slug || category.name)}
@@ -213,26 +214,22 @@ function ProductsContent() {
                           <span className={styles.count}>({parentCount})</span>
                         </button>
                         
-                        {hasChildren && (
-                          <div className={styles.subCategories}>
-                            {category.children!
-                              .filter(child => child.is_active)
-                              .map((child) => {
-                                const childCount = getProductCount(child.slug || child.name);
-                                return (
-                                  <button
-                                    key={child.id}
-                                    className={`${styles.filterItem} ${styles.subItem} ${selectedCategory === child.slug || selectedCategory === child.name ? styles.active : ''}`}
-                                    onClick={() => setSelectedCategory(child.slug || child.name)}
-                                  >
-                                    {child.name}
-                                    <span className={styles.count}>({childCount})</span>
-                                  </button>
-                                );
-                              })}
-                          </div>
-                        )}
-                      </div>
+                        {hasChildren && category.children!
+                          .filter(child => child.is_active)
+                          .map((child) => {
+                            const childCount = getProductCount(child.slug || child.name);
+                            return (
+                              <button
+                                key={child.id}
+                                className={`${styles.filterItem} ${styles.subItem} ${selectedCategory === child.slug || selectedCategory === child.name ? styles.active : ''}`}
+                                onClick={() => setSelectedCategory(child.slug || child.name)}
+                              >
+                                {child.name}
+                                <span className={styles.count}>({childCount})</span>
+                              </button>
+                            );
+                          })}
+                      </React.Fragment>
                     );
                   })}
               </div>
