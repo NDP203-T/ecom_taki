@@ -84,6 +84,61 @@ function ProductsContent() {
     return false;
   };
 
+  // Helper function to count products by category
+  const getProductCount = (categoryIdentifier: string) => {
+    return products.filter(p => 
+      p.is_active && (
+        p.category === categoryIdentifier || 
+        p.category === categoryIdentifier.toLowerCase() ||
+        p.category.toLowerCase() === categoryIdentifier.toLowerCase()
+      )
+    ).length;
+  };
+
+  // Helper function to count products including children categories
+  const getProductCountWithChildren = (category: Category) => {
+    let count = getProductCount(category.slug || category.name);
+    
+    // Add products from children categories
+    if (category.children && category.children.length > 0) {
+      category.children.forEach(child => {
+        if (child.is_active) {
+          count += getProductCount(child.slug || child.name);
+        }
+      });
+    }
+    
+    return count;
+  };
+
+  // Helper function to check if product belongs to category or its children
+  const isProductInCategory = (product: Product, categoryIdentifier: string) => {
+    // Direct match
+    if (product.category === categoryIdentifier || 
+        product.category.toLowerCase() === categoryIdentifier.toLowerCase()) {
+      return true;
+    }
+    
+    // Check if product belongs to any child category
+    const category = categories.find(c => 
+      c.slug === categoryIdentifier || 
+      c.name === categoryIdentifier ||
+      c.slug?.toLowerCase() === categoryIdentifier.toLowerCase() ||
+      c.name.toLowerCase() === categoryIdentifier.toLowerCase()
+    );
+    
+    if (category && category.children && category.children.length > 0) {
+      return category.children.some(child => 
+        product.category === child.slug ||
+        product.category === child.name ||
+        product.category.toLowerCase() === child.slug?.toLowerCase() ||
+        product.category.toLowerCase() === child.name.toLowerCase()
+      );
+    }
+    
+    return false;
+  };
+
   const filteredProducts = products
     .filter(p => p.is_active)
     .filter(p => {
