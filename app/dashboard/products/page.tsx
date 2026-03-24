@@ -486,114 +486,116 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.modalForm}>
-          <div className={styles.formGroup}>
-            <label>Tên sản phẩm</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>SKU (Mã sản phẩm)</label>
-            <input
-              type="text"
-              value={formData.sku}
-              onChange={(e) =>
-                setFormData({ ...formData, sku: e.target.value })
-              }
-              placeholder="IP15PRO-BLK"
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Mô tả</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              rows={4}
-              required
-            />
-          </div>
-
-          <div className={styles.formRow}>
+        <form onSubmit={handleSubmit} className={styles.modalFormWrapper}>
+          <div className={styles.modalForm}>
             <div className={styles.formGroup}>
-              <label>Giá ($)</label>
+              <label>Tên sản phẩm</label>
               <input
-                type="number"
-                value={formData.price}
+                type="text"
+                value={formData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, price: Number(e.target.value) })
+                  setFormData({ ...formData, name: e.target.value })
                 }
-                min="0"
-                step="0.01"
                 required
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label>Tồn kho</label>
+              <label>SKU (Mã sản phẩm)</label>
               <input
-                type="number"
-                value={formData.stock}
+                type="text"
+                value={formData.sku}
                 onChange={(e) =>
-                  setFormData({ ...formData, stock: Number(e.target.value) })
+                  setFormData({ ...formData, sku: e.target.value })
                 }
-                min="0"
+                placeholder="IP15PRO-BLK"
                 required
-                disabled={!!product}
               />
             </div>
-          </div>
 
-          <div className={styles.formGroup}>
-            <label>Danh mục</label>
-            <input
-              type="text"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              placeholder="Electronics"
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>URL hình ảnh</label>
-            <input
-              type="url"
-              value={formData.image_url}
-              onChange={(e) =>
-                setFormData({ ...formData, image_url: e.target.value })
-              }
-              placeholder="https://example.com/image.jpg"
-              required
-            />
-          </div>
-
-          {!product && (
             <div className={styles.formGroup}>
-              <label className={styles.checkbox}>
+              <label>Mô tả</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={4}
+                required
+              />
+            </div>
+
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label>Giá ($)</label>
                 <input
-                  type="checkbox"
-                  checked={formData.is_active}
+                  type="number"
+                  value={formData.price}
                   onChange={(e) =>
-                    setFormData({ ...formData, is_active: e.target.checked })
+                    setFormData({ ...formData, price: Number(e.target.value) })
                   }
+                  min="0"
+                  step="0.01"
+                  required
                 />
-                <span>Hiển thị sản phẩm</span>
-              </label>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Tồn kho</label>
+                <input
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) =>
+                    setFormData({ ...formData, stock: Number(e.target.value) })
+                  }
+                  min="0"
+                  required
+                  disabled={!!product}
+                />
+              </div>
             </div>
-          )}
+
+            <div className={styles.formGroup}>
+              <label>Danh mục</label>
+              <input
+                type="text"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                placeholder="Electronics"
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>URL hình ảnh</label>
+              <input
+                type="url"
+                value={formData.image_url}
+                onChange={(e) =>
+                  setFormData({ ...formData, image_url: e.target.value })
+                }
+                placeholder="https://example.com/image.jpg"
+                required
+              />
+            </div>
+
+            {!product && (
+              <div className={styles.formGroup}>
+                <label className={styles.checkbox}>
+                  <input
+                    type="checkbox"
+                    checked={formData.is_active}
+                    onChange={(e) =>
+                      setFormData({ ...formData, is_active: e.target.checked })
+                    }
+                  />
+                  <span>Hiển thị sản phẩm</span>
+                </label>
+              </div>
+            )}
+          </div>
 
           <div className={styles.modalActions}>
             <button
