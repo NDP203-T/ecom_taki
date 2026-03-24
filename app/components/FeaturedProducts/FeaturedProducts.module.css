@@ -18,12 +18,21 @@
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 20px;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6e6e73;
+  font-size: 16px;
 }
 
 @media (min-width: 640px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
   }
 }
 
@@ -36,6 +45,12 @@
 @media (min-width: 1024px) {
   .grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
   }
 }
 
