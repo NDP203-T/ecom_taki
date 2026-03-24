@@ -6,6 +6,8 @@ import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import ProductCard from '@/app/components/ProductCard';
 import { productsAPI } from '@/lib/api/products';
+import { useAppDispatch } from '@/lib/store/hooks';
+import { addToCart } from '@/lib/store/slices/cartSlice';
 import styles from './product-detail.module.css';
 
 interface Variant {
@@ -39,6 +41,7 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const productId = params.id as string;
   
   const [product, setProduct] = useState<Product | null>(null);
@@ -191,6 +194,39 @@ export default function ProductDetailPage() {
   const hasVariants = product?.variants && product.variants.length > 0;
 
   const handleAddToCart = () => {
+    if (!product) return;
+
+    const cartItem = {
+      id: selectedVariant ? `${product.id}-${selectedVariant.id}` : product.id,
+      productId: product.id,
+      variantId: selectedVariant?.id,
+      name: selectedVariant ? `${product.name} - ${selectedVariant.name}` : product.name,
+      price: currentPrice,
+      quantity,
+      image: images.length > 0 ? images[0] : undefined,
+      sku: selectedVariant ? selectedVariant.sku : product.sku,
+      variant: selectedVariant ? {
+        color: selectedVariant.color,
+        size: selectedVariant.size,
+      } : undefined,
+    };
+
+    dispatch(addToCart(cartItem));
+
+    // Save to localStorage
+    const savedCart = localStorage.getItem('cart');
+    const cartItems = savedCart ? JSON.parse(savedCart) : [];
+    const existingIndex = cartItems.findIndex((item: { id: string }) => item.id === cartItem.id);
+    
+    if (existingIndex >= 0) {
+      cartItems[existingIndex].quantity += quantity;
+    } else {
+      cartItems.push(cartItem);
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+
+    // Show success message
     alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
   };
 

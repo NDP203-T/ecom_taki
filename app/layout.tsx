@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ReduxProvider from "./providers/ReduxProvider";
 import AuthInitializer from "./components/AuthInitializer";
+import CartInitializer from "./components/CartInitializer";
 import ActivityTracker from "./components/ActivityTracker";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
           <AuthInitializer />
+          <CartInitializer />
           <ActivityTracker />
           {children}
         </ReduxProvider>
