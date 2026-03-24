@@ -510,6 +510,32 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
   const [imagePreview, setImagePreview] = useState<string>(
     product?.image_url || ''
   );
+  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const { categoriesAPI } = await import('@/lib/api/categories');
+      const data = await categoriesAPI.getAll();
+      
+      const categoriesArray = data.categories 
+        ? Object.values(data.categories).map((cat: unknown) => {
+            const c = cat as Record<string, unknown>;
+            return {
+              id: c.id as string,
+              name: c.name as string,
+            };
+          })
+        : [];
+      
+      setCategories(categoriesArray);
+    } catch {
+      // Ignore error
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -662,15 +688,20 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
 
             <div className={styles.formGroup}>
               <label>Danh mục</label>
-              <input
-                type="text"
+              <select
                 value={formData.category}
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                placeholder="Electronics"
                 required
-              />
+              >
+                <option value="">-- Chọn danh mục --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className={styles.formGroup}>
