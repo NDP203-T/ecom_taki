@@ -97,9 +97,67 @@ function ProductsContent() {
     }
   };
 
+  // Helper function to count products by category
+  const getProductCount = (categoryIdentifier: string) => {
+    return products.filter(p => 
+      p.is_active && (
+        p.category === categoryIdentifier || 
+        p.category === categoryIdentifier.toLowerCase() ||
+        p.category.toLowerCase() === categoryIdentifier.toLowerCase()
+      )
+    ).length;
+  };
+
+  // Helper function to count products including children categories
+  const getProductCountWithChildren = (category: Category) => {
+    let count = getProductCount(category.slug || category.name);
+    
+    // Add products from children categories
+    if (category.children && category.children.length > 0) {
+      category.children.forEach(child => {
+        if (child.is_active) {
+          count += getProductCount(child.slug || child.name);
+        }
+      });
+    }
+    
+    return count;
+  };
+
+  // Helper function to check if product belongs to category or its children
+  const isProductInCategory = (product: Product, categoryIdentifier: string) => {
+    // Direct match
+    if (product.category === categoryIdentifier || 
+        product.category.toLowerCase() === categoryIdentifier.toLowerCase()) {
+      return true;
+    }
+    
+    // Check if product belongs to any child category
+    const category = categories.find(c => 
+      c.slug === categoryIdentifier || 
+      c.name === categoryIdentifier ||
+      c.slug?.toLowerCase() === categoryIdentifier.toLowerCase() ||
+      c.name.toLowerCase() === categoryIdentifier.toLowerCase()
+    );
+    
+    if (category && category.children && category.children.length > 0) {
+      return category.children.some(child => 
+        product.category === child.slug ||
+        product.category === child.name ||
+        product.category.toLowerCase() === child.slug?.toLowerCase() ||
+        product.category.toLowerCase() === child.name.toLowerCase()
+      );
+    }
+    
+    return false;
+  };
+
   const filteredProducts = products
     .filter(p => p.is_active)
-    .filter(p => selectedCategory === 'all' || p.category === selectedCategory)
+    .filter(p => {
+      if (selectedCategory === 'all') return true;
+      return isProductInCategory(p, selectedCategory);
+    })
     .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
       switch (sortBy) {
@@ -142,14 +200,14 @@ function ProductsContent() {
                 {categories
                   .filter(c => c.is_active)
                   .map((category) => {
-                    const parentCount = products.filter(p => p.is_active && p.category === category.name).length;
+                    const parentCount = getProductCountWithChildren(category);
                     const hasChildren = category.children && category.children.length > 0;
                     
                     return (
                       <div key={category.id}>
                         <button
-                          className={`${styles.filterItem} ${selectedCategory === category.name ? styles.active : ''}`}
-                          onClick={() => setSelectedCategory(category.name)}
+                          className={`${styles.filterItem} ${selectedCategory === category.slug || selectedCategory === category.name ? styles.active : ''}`}
+                          onClick={() => setSelectedCategory(category.slug || category.name)}
                         >
                           {category.name}
                           <span className={styles.count}>({parentCount})</span>
@@ -160,12 +218,12 @@ function ProductsContent() {
                             {category.children!
                               .filter(child => child.is_active)
                               .map((child) => {
-                                const childCount = products.filter(p => p.is_active && p.category === child.name).length;
+                                const childCount = getProductCount(child.slug || child.name);
                                 return (
                                   <button
                                     key={child.id}
-                                    className={`${styles.filterItem} ${styles.subItem} ${selectedCategory === child.name ? styles.active : ''}`}
-                                    onClick={() => setSelectedCategory(child.name)}
+                                    className={`${styles.filterItem} ${styles.subItem} ${selectedCategory === child.slug || selectedCategory === child.name ? styles.active : ''}`}
+                                    onClick={() => setSelectedCategory(child.slug || child.name)}
                                   >
                                     {child.name}
                                     <span className={styles.count}>({childCount})</span>
