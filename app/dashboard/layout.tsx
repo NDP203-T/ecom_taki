@@ -15,16 +15,28 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { user } = useAppSelector((state) => state.auth);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/signin');
-    } else if (user.role !== 'admin') {
-      router.push('/');
-    }
-  }, [user, router]);
+    // Give time for AuthInitializer to restore session
+    const timer = setTimeout(() => {
+      setIsChecking(false);
+    }, 100);
 
-  if (!user || user.role !== 'admin') {
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isChecking) {
+      if (!user) {
+        router.push('/auth/signin');
+      } else if (user.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [user, router, isChecking]);
+
+  if (isChecking || !user || user.role !== 'admin') {
     return null;
   }
 
