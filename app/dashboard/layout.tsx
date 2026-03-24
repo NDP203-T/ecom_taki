@@ -151,6 +151,28 @@ export default function DashboardLayout({
           </Link>
 
           <Link
+            href="/dashboard/categories"
+            className={`${styles.navItem} ${isActive('/dashboard/categories') ? styles.active : ''}`}
+            onClick={closeSidebar}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+              />
+            </svg>
+            <span>Danh mục</span>
+          </Link>
+
+          <Link
             href="/dashboard/orders"
             className={`${styles.navItem} ${isActive('/dashboard/orders') ? styles.active : ''}`}
             onClick={closeSidebar}
