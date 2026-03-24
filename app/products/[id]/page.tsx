@@ -52,6 +52,7 @@ export default function ProductDetailPage() {
     if (productId) {
       loadProduct();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   const loadProduct = async () => {
@@ -62,9 +63,6 @@ export default function ProductDetailPage() {
       const response = await productsAPI.getById(productId);
       const data = response.product || response;
       
-      console.log('Raw API response:', response);
-      console.log('Product data:', data);
-      
       // Parse variants - handle both object and array formats
       let variantsArray: Variant[] = [];
       if (data.variants) {
@@ -74,8 +72,6 @@ export default function ProductDetailPage() {
           variantsArray = Object.values(data.variants);
         }
       }
-      
-      console.log('Parsed variants:', variantsArray);
       
       // Parse images - handle both object and array formats
       let imagesArray: string[] = [];
@@ -123,8 +119,6 @@ export default function ProductDetailPage() {
         }),
       };
       
-      console.log('Final product data:', productData);
-      
       setProduct(productData);
       
       // Set default variant if available
@@ -164,8 +158,7 @@ export default function ProductDetailPage() {
         .slice(0, 4);
       
       setRelatedProducts(related);
-    } catch (error) {
-      console.error('Error loading product:', error);
+    } catch {
       router.push('/products');
     } finally {
       setLoading(false);

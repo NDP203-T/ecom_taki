@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -27,7 +27,7 @@ interface Category {
   children?: Category[];
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   
@@ -246,5 +246,17 @@ export default function ProductsPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div>Đang tải...</div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }

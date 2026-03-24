@@ -11,10 +11,18 @@ import styles from './Header.module.css';
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fix hydration mismatch - use layout effect to avoid cascading renders
+  useEffect(() => {
+    // This is intentional for hydration fix
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {
@@ -115,7 +123,7 @@ export default function Header() {
               </svg>
             </button>
 
-            {user ? (
+            {mounted && user ? (
               <div className={styles.userMenu} ref={dropdownRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -175,10 +183,12 @@ export default function Header() {
                   </div>
                 )}
               </div>
-            ) : (
+            ) : mounted ? (
               <Link href="/auth/signin" className={styles.loginLink}>
                 Đăng nhập
               </Link>
+            ) : (
+              <div style={{ width: '80px' }}></div>
             )}
 
             <button
@@ -233,7 +243,7 @@ export default function Header() {
             >
               Hỗ trợ
             </Link>
-            {user ? (
+            {mounted && user ? (
               <>
                 <div className={styles.mobileMenuDivider}></div>
                 <Link
@@ -257,7 +267,7 @@ export default function Header() {
                   Đăng xuất
                 </button>
               </>
-            ) : (
+            ) : mounted ? (
               <Link
                 href="/auth/signin"
                 className={`${styles.mobileMenuLink} ${styles.primary}`}
@@ -265,7 +275,7 @@ export default function Header() {
               >
                 Đăng nhập
               </Link>
-            )}
+            ) : null}
           </div>
         )}
       </nav>
