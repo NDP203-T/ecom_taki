@@ -135,6 +135,15 @@ export default function Header() {
                       <p className={styles.dropdownEmail}>{user.email}</p>
                     </div>
                     <div className={styles.dropdownDivider}></div>
+                    {user.role === 'admin' && (
+                      <Link
+                        href="/dashboard"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    )}
                     <Link
                       href="/profile"
                       className={styles.dropdownItem}

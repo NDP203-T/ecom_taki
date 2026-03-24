@@ -65,6 +65,15 @@ function* handleVerifyOTP(
         },
       })
     );
+
+    // Redirect dựa trên role
+    if (typeof window !== 'undefined') {
+      if (response.user.role === 'admin') {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/';
+      }
+    }
   } catch (err) {
     const error = err as { response?: { data?: { message?: string } } };
     const errorMessage =
@@ -120,6 +129,15 @@ function* handleLogin(
         },
       })
     );
+
+    // Redirect dựa trên role
+    if (typeof window !== 'undefined') {
+      if (response.user.role === 'admin') {
+        window.location.href = '/dashboard';
+      } else {
+        window.location.href = '/';
+      }
+    }
   } catch (err) {
     const error = err as { response?: { data?: { message?: string } } };
     const errorMessage =

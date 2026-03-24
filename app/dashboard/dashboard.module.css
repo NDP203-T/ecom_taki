@@ -1,0 +1,846 @@
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+.closeSidebar {
+  display: none;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeSidebar:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.sidebarHeader {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.logo svg {
+  color: #6366f1;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 4px;
+  text-decoration: none;
+}
+
+.navItem:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.navItem.active {
+  background: #eef2ff;
+  color: #6366f1;
+}
+
+.navItem svg {
+  flex-shrink: 0;
+}
+
+.sidebarFooter {
+  padding: 16px 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.homeButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.homeButton:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  margin-left: 240px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top Bar */
+.topBar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.menuToggle {
+  display: none;
+  border: none;
+  background: #f9fafb;
+  color: #6b7280;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.menuToggle:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 16px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.searchBar svg {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.searchBar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: #1f2937;
+  width: 100%;
+}
+
+.searchBar input::placeholder {
+  color: #9ca3af;
+}
+
+.topBarActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.iconButton {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f9fafb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+}
+
+.iconButton:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.userProfile:hover {
+  background: #f3f4f6;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.userRole {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Content Area */
+.contentArea {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+}
+
+.contentWrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.buttonText {
+  display: inline;
+}
+
+.buttonIcon {
+  display: inline;
+}
+
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondaryButton:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.primaryButton {
+  padding: 10px 20px;
+  border: none;
+  background: #6366f1;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primaryButton:hover {
+  background: #4f46e5;
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.statCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.3s;
+}
+
+.statCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuButton {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.menuButton:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.statProgress {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.statPercentage {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: right;
+}
+
+/* Charts Grid */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.chartCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.chartTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.chartSubtitle {
+  font-size: 13px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.chartValue {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 24px;
+}
+
+.chartPlaceholder {
+  width: 100%;
+  height: 200px;
+}
+
+/* Orders List */
+.ordersList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.orderItem {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.orderItem:hover {
+  background: #f3f4f6;
+}
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orderId {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.orderCustomer {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.orderAmount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.orderStatus {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.orderStatus[data-status='completed'] {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.orderStatus[data-status='pending'] {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.orderStatus[data-status='shipping'] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .mainContent {
+    margin-left: 200px;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .overlay {
+    display: block;
+  }
+
+  .closeSidebar {
+    display: flex;
+  }
+
+  .mainContent {
+    margin-left: 0;
+  }
+
+  .menuToggle {
+    display: flex;
+  }
+
+  .topBar {
+    padding: 12px 16px;
+  }
+
+  .searchBar {
+    max-width: none;
+    flex: 1;
+  }
+
+  .contentArea {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .secondaryButton,
+  .primaryButton {
+    flex: 1;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .orderItem {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .topBarActions {
+    gap: 8px;
+  }
+
+  .iconButton {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .pageSubtitle {
+    font-size: 13px;
+  }
+
+  .statValue {
+    font-size: 24px;
+  }
+
+  .chartValue {
+    font-size: 28px;
+  }
+
+  .buttonText {
+    display: none;
+  }
+
+  .secondaryButton svg,
+  .primaryButton .buttonIcon {
+    margin: 0;
+  }
+
+  .searchBar {
+    display: none;
+  }
+
+  .contentArea {
+    padding: 12px;
+  }
+
+  .statsGrid,
+  .chartsGrid {
+    gap: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .dashboardContainer {
+    background: #111827;
+  }
+
+  .sidebar {
+    background: #1f2937;
+    border-right-color: #374151;
+  }
+
+  .logo {
+    color: #f9fafb;
+  }
+
+  .sidebarHeader {
+    border-bottom-color: #374151;
+  }
+
+  .navItem {
+    color: #9ca3af;
+  }
+
+  .navItem:hover {
+    background: #374151;
+    color: #f9fafb;
+  }
+
+  .navItem.active {
+    background: #312e81;
+    color: #a5b4fc;
+  }
+
+  .sidebarFooter {
+    border-top-color: #374151;
+  }
+
+  .homeButton {
+    color: #9ca3af;
+  }
+
+  .homeButton:hover {
+    background: #374151;
+    color: #f9fafb;
+  }
+
+  .topBar {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .searchBar {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .searchBar input {
+    color: #f9fafb;
+  }
+
+  .iconButton {
+    background: #374151;
+    color: #9ca3af;
+  }
+
+  .iconButton:hover {
+    background: #4b5563;
+    color: #f9fafb;
+  }
+
+  .userProfile {
+    background: #374151;
+  }
+
+  .userProfile:hover {
+    background: #4b5563;
+  }
+
+  .userName {
+    color: #f9fafb;
+  }
+
+  .pageTitle {
+    color: #f9fafb;
+  }
+
+  .secondaryButton {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .secondaryButton:hover {
+    background: #4b5563;
+  }
+
+  .statCard,
+  .chartCard {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .statValue,
+  .chartValue,
+  .chartTitle,
+  .orderId,
+  .orderAmount {
+    color: #f9fafb;
+  }
+
+  .statLabel,
+  .chartSubtitle,
+  .orderCustomer {
+    color: #9ca3af;
+  }
+
+  .statProgress {
+    background: #374151;
+  }
+
+  .orderItem {
+    background: #374151;
+  }
+
+  .orderItem:hover {
+    background: #4b5563;
+  }
+}
